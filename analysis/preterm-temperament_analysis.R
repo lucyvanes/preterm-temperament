@@ -4,6 +4,9 @@
 # Lovato, Vanes, et al.
 # "Early childhood temperamental trajectories following very preterm birth and their association with parenting style"
 
+library(ggplot2)
+library(jtools)
+library(interactions)
 
 setwd("C:/Users/vanes/OneDrive/Documents/GitHub/preterm-temperament/data")
 
@@ -79,6 +82,17 @@ summary(lm(cbind(cbq4_neg_affect_raw, cbq4_surgency_raw, cbq4_effort_control_raw
     # age4        -0.116203   0.046108  -2.520   0.0126 *  
 
 
+# Figure 1
+#============
+
+m0 <- lm(cbq4_neg_affect_raw ~ m3_easy + m3_diff + sex + ga + imd_score + age4, dat)
+
+effect_plot(m0, pred = m3_diff, interval = TRUE, plot.points = TRUE, point.size=1.5,
+            point.alpha=0.4, point.color="black",
+            x.label="Infant difficult temperament", y.label="Childhood Negative Affectivity (partial residuals)",
+            partial.residuals = TRUE) +
+              theme(axis.text=element_text(size=12, face="bold"),
+              axis.title=element_text(size=16,face="bold"))
 
 #====================================================================================================
 #   3.3. Influence of parenting style on the association between infant and childhood temperament 
@@ -221,7 +235,20 @@ summary(m2_a)
 # Multiple R-squared:  0.1484,	Adjusted R-squared:  0.07436 
 # F-statistic: 2.004 on 8 and 92 DF,  p-value: 0.05445
 
-    
+
+# Figure 2
+#============
+m2a_1 <- lm(cbq4_neg_affect_raw ~ m3_easy * parenting4_laxness_raw + m3_diff + sex + ga + imd_score + age4, dat)
+
+interact_plot(m2a_1, pred = m3_easy, modx = parenting4_laxness_raw, modx.values = NULL, interval = TRUE, plot.points = TRUE, point.size=1.5,
+              point.alpha=0.4, point.color="black",x.label="Infant easy temperament", 
+              y.label="Childhood Negative Affectivity (partial residuals)", 
+              legend.main = "Parental Laxness", partial.residuals = TRUE, colors = "blue")  +
+                theme(axis.text=element_text(size=12, face="bold"),
+                axis.title=element_text(size=16,face="bold"),
+                legend.text=element_text(size=14),
+                legend.title=element_text(size=14))
+
   
 # Overreactivity
 #===================
