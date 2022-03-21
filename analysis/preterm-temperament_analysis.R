@@ -87,12 +87,15 @@ summary(lm(cbind(cbq4_neg_affect_raw, cbq4_surgency_raw, cbq4_effort_control_raw
 
 m0 <- lm(cbq4_neg_affect_raw ~ m3_easy + m3_diff + sex + ga + imd_score + age4, dat)
 
+
+# png( "Figure1_new.jpeg",  width = 6, height = 6, units = 'in', res = 300)
 effect_plot(m0, pred = m3_diff, interval = TRUE, plot.points = TRUE, point.size=1.5,
             point.alpha=0.4, point.color="black",
             x.label="Infant difficult temperament", y.label="Childhood Negative Affectivity (partial residuals)",
             partial.residuals = TRUE) +
               theme(axis.text=element_text(size=12, face="bold"),
               axis.title=element_text(size=16,face="bold"))
+# dev.off()
 
 #====================================================================================================
 #   3.3. Influence of parenting style on the association between infant and childhood temperament 
@@ -236,19 +239,40 @@ summary(m2_a)
 # F-statistic: 2.004 on 8 and 92 DF,  p-value: 0.05445
 
 
-# Figure 2
-#============
+# Simple slope analysis
+##====================
+
+library(reghelper)
 m2a_1 <- lm(cbq4_neg_affect_raw ~ m3_easy * parenting4_laxness_raw + m3_diff + sex + ga + imd_score + age4, dat)
 
-interact_plot(m2a_1, pred = m3_easy, modx = parenting4_laxness_raw, modx.values = NULL, interval = TRUE, plot.points = TRUE, point.size=1.5,
-              point.alpha=0.4, point.color="black",x.label="Infant easy temperament", 
-              y.label="Childhood Negative Affectivity (partial residuals)", 
-              legend.main = "Parental Laxness", partial.residuals = TRUE, colors = "blue")  +
-                theme(axis.text=element_text(size=12, face="bold"),
-                axis.title=element_text(size=16,face="bold"),
-                legend.text=element_text(size=14),
-                legend.title=element_text(size=14))
+m <- mean(dat$parenting4_laxness_raw, na.rm=T)
+sd <- sd(dat$parenting4_laxness_raw, na.rm=T)
 
+m_min1sd <- m-sd
+m_1sd <- m+sd
+
+m_min15sd <- m - 1.5*sd
+m_15sd <- m + 1.5*sd
+
+# +/- 1SD of parenting:
+simple_slopes(m2a_1,levels=list(parenting4_laxness_raw=c(m_min1sd, m_1sd, 'sstest')))
+
+# +/- 1.5SD of parenting:
+simple_slopes(m2a_1,levels=list(parenting4_laxness_raw=c(m_min15sd, m_15sd, 'sstest')))
+
+# Figure 2
+#============
+# png( "Figure2_new.jpeg",  width = 6, height = 6, units = 'in', res = 300)
+
+interact_plot(m2a_1, pred = m3_easy, modx = parenting4_laxness_raw, modx.values = c(m_min15sd, m_min1sd,m, m_1sd,m_15sd), interval = TRUE, plot.points = TRUE, point.size=1.5,
+              point.alpha=0.9, point.color="black",x.label="Infant easy temperament", 
+              y.label="Childhood Negative Affectivity (partial residuals)", modx.labels =c("- 1.5 SD", "- 1 SD","Mean", "+ 1 SD", "+ 1.5 SD"),
+              legend.main = "Parental Laxness", partial.residuals = TRUE, colors = "blue")  +
+  theme(axis.text=element_text(size=12, face="bold"),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=14),
+        legend.title=element_text(size=14))
+# dev.off()
   
 # Overreactivity
 #===================
